@@ -1,0 +1,46 @@
+triggers:
+  - resource: job
+    state: started
+    filter:
+      name: pi*
+      namespace: default
+    actions:
+      - type: slack-notification
+        data:
+          subject: Job Started
+          text: "{{ .Job.ObjectMeta.Name }} started."
+          webhookUrl:
+            valueFrom:
+              secretKeyRef:
+                name: es-ingestion
+                key: slackWebhookUrl
+  - resource: job
+    state: failed
+    filter:
+      name: pi
+      namespace: default
+    actions:
+      - type: slack-notification
+        data:
+          subject: Job Failed
+          text: "{{ .Job.ObjectMeta.Name }} failed to complete."
+          webhookUrl:
+            valueFrom:
+              secretKeyRef:
+                name: es-ingestion
+                key: slackWebhookUrl
+  - resource: job
+    state: succeeded
+    filter:
+      name: pi
+      namespace: default
+    actions:
+      - type: slack-notification
+        data:
+          subject: Job Finished Successfully
+          text: "{{ .Job.ObjectMeta.Name }} finished successfully."
+          webhookUrl:
+            valueFrom:
+              secretKeyRef:
+                name: es-ingestion
+                key: slackWebhookUrl
